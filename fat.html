@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAR and MGC Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+            border-left: 4px solid #3498db;
+        }
+        
+        .result h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .result-item {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .result-value {
+            font-weight: 500;
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            
+            input, button {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FAR and MGC Calculator</h1>
+        
+        <div class="input-group">
+            <label for="landArea">Land Area (Katha)</label>
+            <input type="number" id="landArea" step="0.01" min="0" placeholder="Enter land area">
+        </div>
+        
+        <div class="input-group">
+            <label for="roadWidth">Road Width (meters)</label>
+            <input type="number" id="roadWidth" step="0.01" min="0" placeholder="Enter road width">
+        </div>
+        
+        <button id="calculateBtn">Calculate</button>
+        
+        <div id="result" class="result">
+            <h3>Calculation Results</h3>
+            <div class="result-item">
+                <span class="result-label">FAR:</span>
+                <span class="result-value" id="farResult"></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">MGC (%):</span>
+                <span class="result-value" id="mgcPercentResult"></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">MBA (sq.ft.):</span>
+                <span class="result-value" id="mbaResult"></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">MGC (sq.ft.):</span>
+                <span class="result-value" id="mgcResult"></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Floors:</span>
+                <span class="result-value" id="floorsResult"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            // Get input values
+            const landArea = parseFloat(document.getElementById('landArea').value);
+            const roadWidth = parseFloat(document.getElementById('roadWidth').value);
+            
+            // Validate inputs
+            if (isNaN(landArea) || landArea <= 0) {
+                alert('Please enter a valid land area (greater than 0)');
+                return;
+            }
+            
+            if (isNaN(roadWidth) || roadWidth <= 0) {
+                alert('Please enter a valid road width (greater than 0)');
+                return;
+            }
+            
+            // Determine FAR and MGC based on rules
+            let far, mgcPercent;
+            
+            // Special cases for road width
+            if (roadWidth >= 2.50 && roadWidth <= 3.64) {
+                far = 2.00;
+                mgcPercent = 65;
+            } 
+            else if (roadWidth >= 3.65 && roadWidth <= 5.99) {
+                far = 3.00;
+                mgcPercent = 65;
+            }
+            // Special cases for road width 18m or 24m (override land area rules)
+            else if (roadWidth >= 18 && roadWidth < 24) {
+                far = 6.00;
+                mgcPercent = 50;
+            }
+            else if (roadWidth >= 24) {
+                far = 6.50;
+                mgcPercent = 50;
+            }
+            // Normal cases based on land area and road width
+            else {
+                if (landArea >= 1 && landArea < 2) {
+                    far = 3.15;
+                    mgcPercent = 67.5;
+                } else if (landArea >= 2 && landArea < 3) {
+                    far = 3.35;
+                    mgcPercent = 65;
+                } else if (landArea >= 3 && landArea < 4) {
+                    far = 3.50;
+                    mgcPercent = 62.5;
+                } else if (landArea >= 4 && landArea < 5) {
+                    far = 3.50;
+                    mgcPercent = 62.5;
+                } else if (landArea >= 5 && landArea < 6) {
+                    far = 3.75;
+                    mgcPercent = 60;
+                } else if (landArea >= 6 && landArea < 7) {
+                    far = 3.75;
+                    mgcPercent = 60;
+                } else if (landArea >= 7 && landArea < 8) {
+                    far = 4.00;
+                    mgcPercent = 60;
+                } else if (landArea >= 8 && landArea < 9) {
+                    far = 4.00;
+                    mgcPercent = 60;
+                } else if (landArea >= 9 && landArea < 10) {
+                    far = 4.25;
+                    mgcPercent = 57.5;
+                } else if (landArea >= 10 && landArea < 12) {
+                    far = 4.50;
+                    mgcPercent = 57.5;
+                } else if (landArea >= 12 && landArea < 14) {
+                    far = 4.75;
+                    mgcPercent = 55;
+                } else if (landArea >= 14 && landArea < 16) {
+                    far = 5.00;
+                    mgcPercent = 52.5;
+                } else if (landArea >= 16 && landArea < 18) {
+                    far = 5.25;
+                    mgcPercent = 52.5;
+                } else if (landArea >= 18 && landArea < 20) {
+                    far = 5.25;
+                    mgcPercent = 50;
+                } else if (landArea >= 20) {
+                    far = 5.50;
+                    mgcPercent = 50;
+                }
+            }
+            
+            // Calculate MBA and MGC
+            const mba = landArea * 720 * far;
+            const mgc = landArea * 720 * (mgcPercent / 100);
+            
+            // Calculate number of floors
+            const floors = Math.floor(mba / mgc) + 1;
+            
+            // Display results
+            document.getElementById('farResult').textContent = far;
+            document.getElementById('mgcPercentResult').textContent = mgcPercent + '%';
+            document.getElementById('mbaResult').textContent = mba.toFixed(2);
+            document.getElementById('mgcResult').textContent = mgc.toFixed(2);
+            document.getElementById('floorsResult').textContent = floors;
+            
+            // Show result div
+            document.getElementById('result').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
